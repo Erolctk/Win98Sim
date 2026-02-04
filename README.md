@@ -1,3 +1,6 @@
+![resim](screenshots/Win98Sim.png)
+
+
 # Windows 98 Simulator (Raylib)
 
 A simple Windows 98–style desktop simulator written in C++ using **raylib**.

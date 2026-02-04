@@ -2,36 +2,33 @@
 #define DESKTOP_HPP
 
 #include "raylib.h"
-#include "Window.hpp"
+#include "BasicWindow.hpp"
+#include "IconManager.hpp"
 #include <vector>
-
-struct Icon
-{
-    Rectangle rect;
-    std::string label;
-    Texture2D texture;
-    float lastClickTime;
-};
-
+#include <string>
+#include <memory>
 
 class Desktop
 {
     public:
-        std::vector<OSWindow> windows;
-        std::vector<Icon> icons;
+        IconManager iconManager;
+        
+        std::vector<std::unique_ptr<BasicWindow>> windows;
         Texture2D myComputerIcon;
         Texture2D TrashIcon;
         Texture2D NotepadIcon;
         Texture2D PaintIcon;
         Texture2D FolderIcon;
         Texture2D StartIcon;
+        Texture2D CalculatorIcon;
+        Texture2D InternetIcon;
 
         Desktop();
         ~Desktop();
 
         void Update();
         void Draw();
-        void AddWindow(std::string title);
+        void AddWindow(const std::string& title, Texture2D icon);
         void AddIcon(std::string label, Texture2D tex, float x, float y);
 };
 

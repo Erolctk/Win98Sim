@@ -7,18 +7,12 @@
 class OSWindow
 {
     public:
-        Rectangle rect;
-        Rectangle closeButton;
-        std::string title;
-        Color activeColor;
-        bool isOpen;
-        bool isDragging;
+        virtual ~OSWindow() = default;
 
-        OSWindow(std::string title, float x, float y, float w, float h);
+        virtual void Update() = 0;
+        virtual void Draw() = 0;
 
-        void Draw();
-        void Update();
-
+        bool isOpen = true;
 };
 
 #endif

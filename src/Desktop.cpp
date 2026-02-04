@@ -1,4 +1,5 @@
 #include "Desktop.hpp"
+#include "BasicWindow.hpp"
 #include <ctime>
 
 Desktop::Desktop()
@@ -9,6 +10,13 @@ Desktop::Desktop()
     PaintIcon = LoadTexture("assets/icons/Paint-32x32.png");
     StartIcon = LoadTexture("assets/icons/icon-Win-32x32.png");
     FolderIcon = LoadTexture("assets/icons/Folder-32x32.png");
+    CalculatorIcon = LoadTexture("assets/icons/Calculator-32x32.png");
+    InternetIcon = LoadTexture("assets/icons/Internet-Explorer-32x32.png");
+
+    iconManager.onIconDoubleClick = [this](const std::string& label, Texture2D icon)
+    {
+        AddWindow(label, icon);
+    };
 }
 
 Desktop::~Desktop()
@@ -19,52 +27,44 @@ Desktop::~Desktop()
     UnloadTexture(PaintIcon);
     UnloadTexture(StartIcon);
     UnloadTexture(FolderIcon);
+    UnloadTexture(CalculatorIcon);
+    UnloadTexture(InternetIcon);
 }
 
 void Desktop::Update()
 {
     Vector2 mousePos = GetMousePosition();
 
-    for(auto& icon : icons)
-    {
-        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePos, icon.rect))
-        {
-            float currentTime = GetTime();
-            if(currentTime - icon.lastClickTime < 0.3f)
-            {
-                AddWindow(icon.label);
-            }
-            icon.lastClickTime = currentTime;
-        }
-    }
+    iconManager.Update();
 
     bool mouseHandled = false;
 
     for(int i = windows.size() - 1; i >= 0; i--)
     {
 
-        if(!mouseHandled && windows[i].isOpen)
+        if(!mouseHandled && windows[i]->isOpen)
         {
-            Rectangle titleBar = {windows[i].rect.x, windows[i].rect.y, windows[i].rect.width, 25};
+            Rectangle r = windows[i]->getRect();
+            Rectangle titleBar = {r.x, r.y, r.width, 25};
             if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePos, titleBar) || IsKeyDown(KEY_ENTER))
             {
                mouseHandled = true; 
             }
         }
 
-        windows[i].Update();
+        windows[i]->Update();
 
-        if(!windows[i].isOpen)
+        if(!windows[i]->isOpen)
         {
             windows.erase(windows.begin() + i);
             continue;
         }
 
-        if(windows[i].isDragging && i != windows.size() - 1)
+        if(windows[i]->getIsDragging() && i != windows.size() - 1)
         {
-            OSWindow temp = windows[i];
+            auto temp = std::move(windows[i]);
             windows.erase(windows.begin() + i);
-            windows.push_back(temp);
+            windows.push_back(std::move(temp));
             break;
         }
     }
@@ -73,7 +73,7 @@ void Desktop::Update()
 void Desktop::Draw()
 {
     int barY = GetScreenHeight() - 30;
-    DrawRectangle(0, barY, GetScreenWidth(), barY, LIGHTGRAY);
+    DrawRectangle(0, barY, GetScreenWidth(), 30, LIGHTGRAY);
     DrawLine(0, barY, GetScreenWidth(), barY, WHITE);
 
     time_t now = time(0);
@@ -103,25 +103,21 @@ void Desktop::Draw()
     DrawTextureEx(StartIcon, {(float)btnX + 4, (float)btnY +2}, 0.0f, 0.5f, WHITE);
     DrawText("Start", btnX + 24, btnY + 5, 10, BLACK);
 
-    for(auto& icon : icons)
-    {
-        DrawTextureEx(icon.texture, {icon.rect.x, icon.rect.y}, 0.0f, 1.0f, WHITE);
-        DrawText(icon.label.c_str(), icon.rect.x - 5, icon.rect.y + 40, 10, WHITE);
-    }
+    iconManager.Draw();
     
     for(auto& win : windows)
     {
-        win.Draw();
+        win->Draw();
     }
 }
 
-void Desktop::AddWindow(std::string title)
+void Desktop::AddWindow(const std::string& title, Texture2D icon)
 {
     float offset = windows.size() * 20.0f;
-    windows.push_back(OSWindow(title, 100 + offset, 100 + offset, 400, 300));
+    windows.push_back(std::make_unique<BasicWindow>(title, icon, 100 + offset, 100 + offset, 400, 300));
 }
 
 void Desktop::AddIcon(std::string label, Texture2D tex, float x, float y)
 {
-    icons.push_back({{x, y, 40, 40}, label, tex, 0.0f});
+    iconManager.AddIcon(AppType::Notepad, label, tex, x, y);
 }

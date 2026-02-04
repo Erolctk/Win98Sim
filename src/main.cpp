@@ -15,10 +15,12 @@ int main()
     Desktop myDesktop;
 
     myDesktop.AddIcon("My Computer", myDesktop.myComputerIcon, 20, 20);
+    myDesktop.AddIcon("Explorer", myDesktop.InternetIcon, 100, 20);
     myDesktop.AddIcon("Trash", myDesktop.TrashIcon, 20, 100);
     myDesktop.AddIcon("Notepad", myDesktop.NotepadIcon, 20, 180);
     myDesktop.AddIcon("Paint", myDesktop.PaintIcon, 20, 260);
     myDesktop.AddIcon("Folder", myDesktop.FolderIcon, 20, 340);
+    myDesktop.AddIcon("Calculator", myDesktop.CalculatorIcon, 20, 420);
 
     while(!WindowShouldClose())
     {
